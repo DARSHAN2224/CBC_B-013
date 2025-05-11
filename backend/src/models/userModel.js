@@ -39,11 +39,6 @@ const userSchema = new mongoose.Schema(
         is_verified: {
             type: Boolean,
             default: false
-        },
-        role: {
-            type: Number,
-            enum: [0, 1],
-            default: 0
         }, // 0 for Patient, 1 for Doctor
         lastLogin: { type: Date, default: Date.now },
         resetPasswordToken: String,

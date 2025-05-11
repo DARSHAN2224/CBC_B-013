@@ -1,10 +1,20 @@
 import { Router } from 'express';
 const userRouter =  Router();
-import { loginUser, logoutUser, refreshAccessToken, registerUser,verifyEmail,forgotPassword,resetPassword,updateEditProfile,PatientProblemsUpdate ,loadHome,sendverification,checkAuth,searchDoctor,getPatientsByDoctor,contactUs} from '../controllers/userController.js';
+import { loginUser, logoutUser,
+     refreshAccessToken,
+      registerUser,verifyEmail,
+      forgotPassword,
+      resetPassword,
+      updateEditProfile, 
+      loadHome,sendverification,
+      checkAuth,contactUs, 
+      predictHandler,
+    storeAnswers,
+    generateSuggestions,
+    recommendPersonalHabits} from '../controllers/userController.js';
 import {upload} from "../middlewares/multerMiddleware.js"
 import {verifyJWT,onlyPatientAccess} from '../middlewares/authMiddleware.js';
 import { registerValidator,loginValidator,resetPasswordValidator ,forgetPasswordValidator,updateUserValidator} from '../utils/validator.js'
-
 
 
 userRouter.route("/signup").post(registerValidator,registerUser);
@@ -20,12 +30,17 @@ userRouter.get("/check-auth",verifyJWT,checkAuth)
 // userRouter.get("/viewProfile",verifyJWT,viewProfile)
 // userRouter.get("/edit-profile",verifyJWT,loadEditProfile)
 userRouter.post("/update-profile",verifyJWT, upload.single('image'),updateUserValidator,updateEditProfile)
-userRouter.post("/update-patientProblem",verifyJWT, upload.single('image'),PatientProblemsUpdate)
+// userRouter.post("/update-patientProblem",verifyJWT, upload.single('image'),PatientProblemsUpdate)
 userRouter.post("/contactus",verifyJWT,contactUs)
 
 userRouter.get('/home', verifyJWT,onlyPatientAccess,loadHome);
-userRouter.get("/search",verifyJWT,searchDoctor)
-userRouter.get('/patients',verifyJWT, getPatientsByDoctor);
+// userRouter.get("/search",verifyJWT,searchDoctor)
+// userRouter.get('/patients',verifyJWT, getPatientsByDoctor);
 
+// Routes for mental health prediction system
+userRouter.post('/predict', verifyJWT, predictHandler);
+userRouter.post('/store-answers', verifyJWT, storeAnswers);
+userRouter.post('/generate-suggestions', verifyJWT, generateSuggestions);
+userRouter.post('/recommend-personal-habits', verifyJWT, recommendPersonalHabits);
 export default userRouter;
 

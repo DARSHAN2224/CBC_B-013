@@ -1,2 +1,2 @@
-export const DB_NAME = 'teleMedicine';
+export const DB_NAME = 'hello';
 

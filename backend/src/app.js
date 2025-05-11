@@ -26,7 +26,7 @@ if (process.env.NODE_ENV === "production") {
 	});
 }
 //routes declerations 
-app.use("/api/v1/users", userRouter);
+app.use("/api/users", userRouter);
 
 
 export { app };

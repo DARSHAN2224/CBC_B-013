@@ -1,8 +1,9 @@
 import { asyncHandler } from '../utils/asyncHandler.js'
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { User } from '../models/userModel.js'
-import { Doctor } from '../models/doctorModel.js'
+// import { Doctor } from '../models/doctorModel.js'
 import { ApiError } from '../utils/ApiError.js'
+import Answer from "../models/Answer.js"
 import uploadOnCloudinary from '../utils/cloudinary.js'
 import ContactUs from "../models/contactus.js"
 import jwt from "jsonwebtoken"
@@ -10,7 +11,8 @@ import { validationResult } from "express-validator"
 import { sendVerificationEmail, contactUS,sendWelcomeEmail, sendResetPasswordEmail, sendResetSuccessEmail } from "../utils/emails.js"
 import { randomBytes } from "node:crypto"
 import { generateVerificationCode } from "../utils/generateVerificationCode.js";
-import { Patient } from '../models/patientModel.js'
+import axios from "axios";
+// import { Patient } from '../models/patientModel.js'
 const generateAccessToken = async (userId) => {
     try {
         const user = await User.findById(userId);
@@ -51,7 +53,7 @@ export const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError("Error while sign up", 400, errors.array())
     }
 
-    const { name, email, password, mobile, role,speciality} = req.body
+    const { name, email, password, mobile} = req.body
 
     const userAlreadyExists = await User.findOne({ email });
     if (userAlreadyExists) {
@@ -60,20 +62,8 @@ export const registerUser = asyncHandler(async (req, res) => {
     const verificationToken = generateVerificationCode();
 
     let user;
-    if (role === 'doctor') {
-      user = new Doctor({
-        email,
-        password,
-        name,
-        mobile,
-        speciality,
-        role: 1,
-        // image: image?.url || '',
-        verificationToken,
-        verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
-      });
-    } else if (role === 'patient') {
-      user = new Patient({
+    
+      user = new User({
         email,
         password,
         name,
@@ -81,10 +71,6 @@ export const registerUser = asyncHandler(async (req, res) => {
         verificationToken,
         verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
       });
-    } else {
-        throw new ApiError("Error while choosing the role", 400, "wrong role choose",)
-    }
-
 
     await user.save();
 
@@ -305,10 +291,6 @@ export const updateEditProfile = asyncHandler(async (req, res) => {
     user.name = name;
     user.email = email;
     user.mobile = mobile;
-    if(user.role=="doctor")
-    user.speciality=speciality;
-
-
 
     await user.save(); // Save updates to database
     res.status(200).json(new ApiResponse(200, {
@@ -368,105 +350,6 @@ export const checkAuth=asyncHandler( async (req, res)=>{
     
 })
 
-export const PatientProblemsUpdate = asyncHandler(async (req, res) => {
-    const { doctorToConsult, diseaseName, symptoms, bookingDate } = req.body; // Extract user data
-    console.log(doctorToConsult+"kjkk");
-    
-    const userId = req.user._id; // Get user ID from session
-    const user = await User.findById(userId); // Fetch user from the database
-
-    if (!user) {
-        throw new ApiError("Patient Problems Update error", 404, "User not found");
-    }
-    const doctor = await User.findOne({
-        name: { $regex: doctorToConsult, $options: 'i' }
-      });
-          if (user.role === 0) {
-        // Push the new data into the patientDetails array
-        user.patientDetails.push({
-            doctorToConsult:doctor,
-            diseaseName,
-            symptoms,
-            bookingDate,
-        });
-
-        await user.save(); // Save updates to database
-    }
-
-    // Respond with updated user data (excluding sensitive fields like password and refreshTokens)
-    res.status(200).json(new ApiResponse(200, {
-        ...user._doc,
-        password: undefined,
-        refreshTokens: undefined,
-    }, "User updated successfully"));
-});
-
-
-// Search API to get doctors based on disease (specialty)
-export const searchDoctor=asyncHandler( async (req, res) => {
-    const query = req.query.disease.toLowerCase(); // Get the search query
-    console.log(query);
-    
-        // Find doctors whose specialties match the search query
-        const doctors = await Doctor.find({
-            speciality: { $regex: query, $options: 'i' } // $in query to check if the disease is in specialties
-        });
-        console.log(doctors);
-        
-        if(!doctors){
-            throw new ApiError("doctor search error ", 404, "doctor not found");
-
-        }
-         res.status(200).json(new ApiResponse(200, doctors, "User updated successfully")); // Return matching doctors
-    
-});
-
-export const getPatientsByDoctor = asyncHandler(async (req, res) => {
-    const  doctorId  = req.user._id; // Extract doctorId from the URL parameters
-    // console.log(doctorId);
-    
-    // Query patients directly with doctorId and populate doctor details
-    const patients = await Patient.find({
-        'patientDetails.doctorToConsult': doctorId, // Pass doctorId as a string
-      }).populate({
-        path: 'patientDetails.doctorToConsult', // Populate doctor details
-        select: 'name specialization', // Select specific fields from Doctor model
-      });
-  
-      console.log(patients);
-
-      const formattedPatients = patients.flatMap((patient) => {
-        if (!Array.isArray(patient.patientDetails)) {
-          console.warn(`Patient ${patient.name || patient._id} has no valid patientDetails`);
-          return []; // Skip invalid patients
-        }
-      
-        return patient.patientDetails
-          .filter((detail) => {
-            // Convert both IDs to strings for comparison
-            const doctorToConsultId = detail.doctorToConsult?._id?.toString();
-            const normalizedDoctorId = doctorId.toString(); // Convert ObjectId to string
-            console.log('doctorToConsultId:', doctorToConsultId);
-            console.log('normalizedDoctorId:', normalizedDoctorId);
-            const match = doctorToConsultId === normalizedDoctorId;
-            console.log('Match:', match);
-            return match;
-          })
-          .map((detail) => ({
-            name: patient.name, // Access from the parent `patient` object
-            email: patient.email,
-            mobile: patient.mobile,
-            symptoms: detail.symptoms,
-            diseaseName: detail.diseaseName,
-            doctor: detail.doctorToConsult, // Populated doctor details
-            bookingDate: detail.bookingDate,
-          }));
-      });
-        
-    res.status(200).json(new ApiResponse(200, formattedPatients, "User updated successfully")); // Return matching doctors
-});
-
-
 export const contactUs=asyncHandler(async (req,res) => {
     const {email,message}=req.body;
     const user=new ContactUs({
@@ -479,3 +362,78 @@ export const contactUs=asyncHandler(async (req,res) => {
         {}, "emailed successfully"))
 
 })
+
+export const predictHandler = asyncHandler(async (req, res) => {
+    console.log("hhhh");
+    
+    const response = await axios.post('http://localhost:5000/predict', req.body);
+
+    if (!response || !response.data) {
+        throw new ApiError("Error during prediction", 500, "No data received from prediction service");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, response.data, "Prediction successful")
+    );
+});
+
+
+// Route to store answers in MongoDB
+export const storeAnswers = asyncHandler(async (req, res) => {
+    const { user_id, answers } = req.body;
+
+    const newAnswer = new Answer({ user_id, answers });
+    await newAnswer.save();
+
+    return res.status(200).json(
+        new ApiResponse(200, {}, "Answers saved successfully")
+    );
+});
+
+// Route to generate suggestions based on stored answers
+
+
+export const generateSuggestions = asyncHandler(async (req, res) => {
+    const { user_id } = req.body;
+
+    if (!user_id) {
+        throw new ApiError("user_id is required", 400,"hhh");
+    }
+
+    const answerDoc = await Answer.findOne({ user_id }, { answers: 1 });
+
+    if (!answerDoc || !answerDoc.answers) {
+        throw new ApiError("Answers not found", 404,"kjkjk");
+    }
+
+    const answersObject = Object.fromEntries(answerDoc.answers);
+
+    const response = await axios.post('http://localhost:5000/generate_suggestions', answersObject);
+
+    return res.status(200).json(
+        new ApiResponse(200, { suggestions: response.data.suggestions }, "Suggestions generated successfully")
+    );
+});
+
+
+export const recommendPersonalHabits = asyncHandler(async (req, res) => {
+    const { user_id } = req.body;
+
+    if (!user_id) {
+        throw new ApiError("user_id is required", 400,"vhhja");
+    }
+
+    const answerDoc = await Answer.findOne({ user_id }, { answers: 1 });
+
+    if (!answerDoc || !answerDoc.answers) {
+        throw new ApiError("Answers not found", 404,"hggjgj");
+    }
+
+    const answersObject = Object.fromEntries(answerDoc.answers);
+
+    const response = await axios.post('http://localhost:5000/generate_suggestions', answersObject);
+
+    return res.status(200).json(
+        new ApiResponse(200, { suggestion: response.data.suggestion }, "Personal habit recommendation generated")
+    );
+});
