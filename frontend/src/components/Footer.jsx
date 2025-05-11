@@ -1,11 +1,101 @@
 import React from 'react';
 
-const Footer = () => (
-    <footer className="bg-gray-800 py-4 mt-auto">
-        <div className="text-center text-gray-400">
-            &copy; 2024 MyApp. All rights reserved.
+const Footer = () => {
+  return (
+    <footer className="bg-white light:bg-gray-900 mt-10">
+      <div className="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
+        <div className="md:flex md:justify-between">
+          {/* Brand */}
+          <div className="mb-6 md:mb-0">
+            <a href="/" className="flex items-center">
+              <img
+                src="https://flowbite.com/docs/images/logo.svg"
+                className="h-8 me-3"
+                alt="FlowBite Logo"
+              />
+              <span className="self-center text-2xl font-semibold whitespace-nowrap text-blue-700">
+                InnerSight
+              </span>
+            </a>
+          </div>
+
+          {/* Links */}
+          <div className="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">
+            <div>
+              <h2 className="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-blue-500">
+                Resources
+              </h2>
+              <ul className="text-gray-500 dark:text-gray-400 font-medium">
+                <li className="mb-4">
+                  <a href="/model" className="hover:underline">
+                    Model
+                  </a>
+                </li>
+                <li>
+                  <a href="/profile" className="hover:underline">
+                    Profile
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h2 className="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-blue-500">
+                Follow us
+              </h2>
+              <ul className="text-gray-500 dark:text-gray-400 font-medium">
+                <li className="mb-4">
+                  <a href="https://github.com/themesberg/flowbite" className="hover:underline">
+                    Github
+                  </a>
+                </li>
+                <li>
+                  <a href="https://discord.gg/4eeurUVvTy" className="hover:underline">
+                    Discord
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h2 className="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-blue-500">
+                Legal
+              </h2>
+              <ul className="text-gray-500 dark:text-gray-400 font-medium">
+                <li className="mb-4">
+                  <a href="#" className="hover:underline">
+                    Privacy Policy
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:underline">
+                    Terms &amp; Conditions
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
+
+        <hr className="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
+        <div className="sm:flex sm:items-center sm:justify-between">
+          <span className="text-sm text-gray-500 sm:text-center dark:text-gray-400">
+            © 2023{' '}
+            <a href="./inner" className="hover:underline">
+              Innersight™
+            </a>
+            . All Rights Reserved.
+          </span>
+          <div className="flex mt-4 sm:justify-center sm:mt-0 space-x-5">
+            <a href="#" className="text-gray-500 hover:text-gray-900 dark:hover:text-white">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 8 19">
+                <path d="M6.135 3H8V0H6.135a4.147 4.147 0 0 0-4.142 4.142V6H0v3h2v9.938h3V9h2.021l.592-3H5V3.591A.6.6 0 0 1 5.592 3h.543Z" />
+              </svg>
+              {/* <span className="sr-only">Facebook page</span> */}
+            </a>
+          </div>
+        </div>
+      </div>
     </footer>
-);
+  );
+};
 
 export default Footer;

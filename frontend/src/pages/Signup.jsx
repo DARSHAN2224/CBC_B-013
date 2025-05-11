@@ -21,8 +21,8 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { email, password, name, speciality, mobile } = formData;
-      await signup(email, password, name, speciality, mobile);
+      const { email, password, name, mobile } = formData;
+      await signup(email, password, name, mobile);
       navigate("/verify-email");
     } catch (error) {
       console.log(error);
@@ -33,7 +33,7 @@ const Signup = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
       <form className="w-full max-w-md p-10 bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-xl shadow-xl rounded-2xl" onSubmit={handleSubmit}>
         <h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-transparent bg-clip-text">
-          Doctor Signup
+           Signup
         </h2>
         <div className="mb-4">
           <label className="block text-gray-300 mb-2" htmlFor="name">
@@ -91,20 +91,7 @@ const Signup = () => {
             required
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-gray-300 mb-2" htmlFor="speciality">
-          Speciality:
-          </label>
-          <input
-            type="text"
-            id="speciality"
-            name="speciality"
-            value={formData.speciality}
-            onChange={handleChange}
-            className="w-full px-4 py-2 bg-gray-700 text-white border border-gray-600 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900"
-            required
-          />
-        </div>
+      
         {error && <p className="text-red-500 font-semibold mb-4">{error}</p>}
         <button
           type="submit"

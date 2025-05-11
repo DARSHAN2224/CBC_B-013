@@ -21,7 +21,7 @@ const SendEmailVerification = () => {
         e.preventDefault();
         await verify(email);
         setIsSubmitted(true);
-        navigate("/doctor/verify-email");
+        navigate("/verify-email");
     };
 
     return (

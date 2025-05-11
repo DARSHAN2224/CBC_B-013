@@ -19,7 +19,7 @@ const Login = () => {
     e.preventDefault();
     const { email, password } = formData;
     await login(email, password);
-    navigate("/doctor");
+    navigate("/");
   };
 
   return (
@@ -70,7 +70,7 @@ const Login = () => {
         </button>
         <div className="mt-4 text-center">
           <Link
-            to="/doctor/forgot-password"
+            to="/forgot-password"
             className="text-sm text-green-400 hover:underline"
           >
             Forgot password?
@@ -79,7 +79,7 @@ const Login = () => {
         <div className="px-8 py-4 mt-6 bg-gray-900 bg-opacity-50 flex justify-center rounded-md">
           <p className="text-sm text-gray-300">
             Don't have an account?{" "}
-            <Link to="/doctor/signup" className="text-green-400 hover:underline">
+            <Link to="/signup" className="text-green-400 hover:underline">
               Sign up
             </Link>
           </p>

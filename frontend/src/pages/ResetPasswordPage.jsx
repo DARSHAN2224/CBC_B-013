@@ -22,7 +22,7 @@ const ResetPasswordPagePatient = () => {
 
             toast.success("Password reset successfully, redirecting to login page...");
             setTimeout(() => {
-                navigate("/doctor/login");
+                navigate("/login");
             }, 2000);
         }
 

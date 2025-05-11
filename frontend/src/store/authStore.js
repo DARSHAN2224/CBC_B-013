@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import axios from "axios"
-const API_URL = import.meta.env.MODE === "development" ? "http://localhost:8000/api/v1/users" : "/api/v1/users";
+const API_URL = import.meta.env.MODE === "development" ? "http://localhost:8000/api/users" : "/api/users";
 
 axios.defaults.withCredentials = true;
 
@@ -8,43 +8,29 @@ axios.defaults.withCredentials = true;
 
 export const useAuthStore = create((set,get) => ({
     user: null,
-    doctors:null,
     isAuthenticated: false,
     error: null,
     isLoading: false,
     isCheckingAuth: true,
     message: null,
 
-    signup: async (email, password, name,speciality,mobile) => {
-        set({ isLoading: true, error: null });
-        console.log(API_URL);
-
-        try {
-            const response = await axios.post(`${API_URL}/signup`, { email, password, name, speciality ,role:"doctor",mobile});
-            set({ user: response.data.data, isAuthenticated: true, isLoading: false });
-        } catch (error) {
-            let errorMessage = errors(error);
-            console.log(errorMessage);
-
-            set({ error: errorMessage || "Error signing up", isLoading: false });
-            throw error;
-        }
-    },
-    signupPatient: async (email, password, name,mobile) => {
-        set({ isLoading: true, error: null });
-        console.log(API_URL);
-
-        try {
-            const response = await axios.post(`${API_URL}/signup`, { email, password, name ,role:"patient",mobile});
-            set({ user: response.data.data, isAuthenticated: true, isLoading: false });
-        } catch (error) {
-            let errorMessage = errors(error);
-            console.log(errorMessage);
-
-            set({ error: errorMessage || "Error signing up", isLoading: false });
-            throw error;
-        }
-    },
+   signup: async (email, password, name, mobile) => {
+    set({ isLoading: true, error: null });
+    try {
+        const response = await axios.post(`${API_URL}/signup`, {
+            email,
+            password,
+            name,
+            mobile,
+        });
+        set({ user: response.data.data, isAuthenticated: true, isLoading: false });
+    } catch (error) {
+        let errorMessage = errors(error);
+        set({ error: errorMessage || "Error signing up", isLoading: false });
+        throw error;
+    }
+}
+,
     login: async (email, password) => {
         set({ isLoading: true, error: null });
         try {
@@ -189,48 +175,7 @@ export const useAuthStore = create((set,get) => ({
             throw error
 
         }
-    },patientProblem: async (doctorToConsult, diseaseName, symptoms, bookingDate) => {
-        set({ isLoading: true, error: null });
-        try {
-            const response = await axios.post(`${API_URL}/update-patientProblem`, { doctorToConsult, diseaseName, symptoms, bookingDate });
-            console.log(response.data.data);
-            console.log(response);
-            
-            set({
-                isAuthenticated: true,
-                user: response.data.data,
-                error: null,
-                isLoading: false,
-            });
-        } catch (error) {
-            let errorMessage = errors(error);
-            console.log(errorMessage);
-
-            set({ error: errorMessage || "Error logging in", isLoading: false });
-            throw error;
-        }
-    },
-     fetchDoctorsByDisease :async (query) => {
-        try {
-          const response = await axios.get(`${API_URL}/search?disease=${query}`);
-          console.log(response);
-          
-          return response.data.data || []; // Return the list of suggested doctors
-        } catch (error) {
-          console.error("Error fetching doctors:", error);
-          return []; // Return an empty array in case of error
-        }
-      },
-       getPatientsByDoctor :async () => {
-        try {
-          const response = await axios.get(`${API_URL}/patients`);
-          console.log(response); // For debugging purposes
-          return response.data.data || []; // Return patient data if available
-        } catch (error) {
-          console.error("Error fetching patients:", error);
-          return []; // Return an empty array in case of an error
-        }
-      },sendContactus:async (email,message) => {
+    },sendContactus:async (email,message) => {
         try {
           const response = await axios.post(`${API_URL}/contactus`,{email,message});
           console.log(response); // For debugging purposes
