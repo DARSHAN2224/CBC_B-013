@@ -259,14 +259,16 @@ export const resetPassword = asyncHandler(async (req, res) => {
 })
 
 export const updateEditProfile = asyncHandler(async (req, res) => {
+    console.log("ddd");
+    
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
         throw new ApiError("Validation error while updating profile", 400, errors.array());
     }
 
-    const { name, email, mobile,speciality} = req.body; // Extract user data
-    console.log(name,email,mobile,speciality,"kkkk");
+    const { name, email, mobile} = req.body; // Extract user data
+    console.log(name,email,mobile,"kkkk");
     
     const userId = req.user._id; // Get user ID from session
     const user = await User.findById(userId); // Fetch user from the database
@@ -378,13 +380,28 @@ export const predictHandler = asyncHandler(async (req, res) => {
 });
 
 
+
+
 // Route to store answers in MongoDB
 export const storeAnswers = asyncHandler(async (req, res) => {
     const { user_id, answers } = req.body;
+    console.log(user_id);
+    
+    // // Validation for user_id and answers
+    // if (!user_id || !answers || typeof answers !== 'object' || Array.isArray(answers)) {
+    //     return res.status(400).json(
+    //         new ApiResponse(400, {}, "Invalid input: user_id or answers is missing or formatted incorrectly.")
+    //     );
+    // }
 
+    // Create a new Answer document
     const newAnswer = new Answer({ user_id, answers });
+    console.log(newAnswer);
+    
+    // Save to the database
     await newAnswer.save();
 
+    // Send success response
     return res.status(200).json(
         new ApiResponse(200, {}, "Answers saved successfully")
     );
@@ -397,16 +414,29 @@ export const generateSuggestions = asyncHandler(async (req, res) => {
     const { user_id } = req.body;
 
     if (!user_id) {
-        throw new ApiError("user_id is required", 400,"hhh");
+        throw new ApiError("user_id is required", 400, "hhh");
     }
 
     const answerDoc = await Answer.findOne({ user_id }, { answers: 1 });
 
     if (!answerDoc || !answerDoc.answers) {
-        throw new ApiError("Answers not found", 404,"kjkjk");
+        throw new ApiError("Answers not found", 404, "kjkjk");
     }
 
-    const answersObject = Object.fromEntries(answerDoc.answers);
+    // Transform the array to a key-value pair object
+    // If answers are already in a key-value pair format, this step isn't needed
+    let answersObject;
+    if (Array.isArray(answerDoc.answers)) {
+        // Example: Transforming answers array into an object with a dynamic key structure
+        answersObject = answerDoc.answers.reduce((acc, curr, index) => {
+            // Modify the key naming based on your data
+            acc[`answer${index + 1}`] = curr; // You may need to adjust how you structure the keys
+            return acc;
+        }, {});
+    } else {
+        // If answers are already in key-value format, you can just use it directly
+        answersObject = answerDoc.answers;
+    }
 
     const response = await axios.post('http://localhost:5000/generate_suggestions', answersObject);
 
@@ -416,24 +446,38 @@ export const generateSuggestions = asyncHandler(async (req, res) => {
 });
 
 
+
 export const recommendPersonalHabits = asyncHandler(async (req, res) => {
-    const { user_id } = req.body;
+   const { user_id } = req.body;
 
     if (!user_id) {
-        throw new ApiError("user_id is required", 400,"vhhja");
+        throw new ApiError("user_id is required", 400, "hhh");
     }
 
     const answerDoc = await Answer.findOne({ user_id }, { answers: 1 });
 
     if (!answerDoc || !answerDoc.answers) {
-        throw new ApiError("Answers not found", 404,"hggjgj");
+        throw new ApiError("Answers not found", 404, "kjkjk");
     }
 
-    const answersObject = Object.fromEntries(answerDoc.answers);
+    // Transform the array to a key-value pair object
+    // If answers are already in a key-value pair format, this step isn't needed
+    let answersObject;
+    if (Array.isArray(answerDoc.answers)) {
+        // Example: Transforming answers array into an object with a dynamic key structure
+        answersObject = answerDoc.answers.reduce((acc, curr, index) => {
+            // Modify the key naming based on your data
+            acc[`answer${index + 1}`] = curr; // You may need to adjust how you structure the keys
+            return acc;
+        }, {});
+    } else {
+        // If answers are already in key-value format, you can just use it directly
+        answersObject = answerDoc.answers;
+    }
 
-    const response = await axios.post('http://localhost:5000/generate_suggestions', answersObject);
+    const response = await axios.post('http://localhost:5000/recommend_personal_habits', answersObject);
 
     return res.status(200).json(
         new ApiResponse(200, { suggestion: response.data.suggestion }, "Personal habit recommendation generated")
-    );
+    );
 });

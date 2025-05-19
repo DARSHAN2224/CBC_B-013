@@ -157,25 +157,29 @@ export const useAuthStore = create((set,get) => ({
             throw error;
 		
 		}
-	},updateProfile:async (formData) => {
-        set({ isCheckingAuth: true, error: null });
-        try {
-            const response = await axios.post(`${API_URL}/update-profile`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data', // Required for file uploads
-                },
-            });            console.log(response);
+	},updateProfile: async (formData) => {
+    set({ isCheckingAuth: true, error: null });
+    try {
+        const response = await axios.post(`${API_URL}/update-profile`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });            
+        console.log(response);
 
-            set({ user: response.data.data, isCheckingAuth:false,isAuthenticated: true});
-        } catch (error) {
-            let errorMessage = errors(error);
-            console.log(error);
+        set({ user: response.data.data, isCheckingAuth: false });
+    } catch (error) {
+        let errorMessage = errors(error);
+        console.log(error);
 
-            set({ error: errorMessage, isCheckingAuth: false,isAuthenticated: false });
-            throw error
+        // Don't reset isAuthenticated to false here
+        set({ error: errorMessage, isCheckingAuth: false });
 
-        }
-    },sendContactus:async (email,message) => {
+        // Optionally re-throw if you want to catch it in the component
+        throw error;
+    }
+},
+sendContactus:async (email,message) => {
         try {
           const response = await axios.post(`${API_URL}/contactus`,{email,message});
           console.log(response); // For debugging purposes

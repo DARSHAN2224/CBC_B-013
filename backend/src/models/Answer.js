@@ -2,11 +2,12 @@
 import mongoose from 'mongoose';
 
 const answerSchema = new mongoose.Schema({
-  user_id: { type: String, required: true },
-  answers: {
-    type: Map,
-    of: String, // Modify type if you need numbers, booleans, or objects
+  user_id: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    required: true, 
+    ref: 'User'  // Reference to the User model
   },
+ answers: [String],
   timestamp: { type: Date, default: Date.now },
 });
 

@@ -93,16 +93,20 @@ const Model = () => {
                 <div className="bg-white rounded-xl shadow p-6 mb-10">
 
                     <h3 className="text-lg font-bold text-gray-800 mb-4">📝 Follow-up Questions</h3>
-                    {questions.map((question, idx) => (
-                        <div key={idx} className="mb-4">
-                            <p className="mb-2 text-gray-700">{question}</p>
-                            <input
-                                type="text"
-                                onChange={(e) => setAnswer(idx, e.target.value)}
-                                className="w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:ring-green-500 focus:border-green-500 text-gray-900"
-                            />
-                        </div>
-                    ))}
+                   {questions.map((question, idx) => (
+    <div key={idx} className="mb-4">
+        <p className="mb-2 text-gray-700">{question}</p>
+        {/* Show input only if the question does not contain 'Question about personal habits' or any other static text */}
+        {!(question.includes("**Question about personal habits**") || question.includes("**10 Follow-up Questions:**")) && (
+            <input
+                type="text"
+                onChange={(e) => setAnswer(idx, e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:ring-green-500 focus:border-green-500 text-gray-900"
+            />
+        )}
+    </div>
+))}
+
                     <button
                         onClick={handleStoreAnswers}
                         className="mt-2 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition"
@@ -112,29 +116,38 @@ const Model = () => {
                 </div>
             )}
 
-            {suggestions && (
-                <div className="bg-white rounded-xl shadow p-6 mb-10">
-                    <button
-                        onClick={handleGenerateSuggestions}
-                        className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition mb-4"
-                    >
-                        Generate Suggestions
-                    </button>
-                    <div className="bg-gray-100 p-4 rounded shadow-inner text-gray-800">
-                        <h4 className="font-semibold text-lg mb-2">📌 Suggestions:</h4>
-                        <p>{suggestions}</p>
-                    </div>
-                </div>
+          
+               <div className="bg-white rounded-xl shadow p-6 mb-10">
+    <button
+        onClick={handleGenerateSuggestions}
+        className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition mb-4"
+    >
+        Generate Suggestions
+    </button>
+    <div className="bg-gray-100 p-4 rounded shadow-inner text-gray-800">
+        <h4 className="font-semibold text-lg mb-2">📌 Suggestions:</h4>
+        <div>
+            {Array.isArray(suggestions) ? (
+                suggestions.map((line, index) => (
+                    <p key={index} className="mb-3">• {line}</p>  // Line space added
+                ))
+            ) : (
+                <p>{suggestions}</p>
             )}
+        </div>
+    </div>
+</div>
 
-            <div className="mb-10">
+        
+
+            {/* <div className="mb-10">
                 <button
                     onClick={handleFetchRecommendations}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg transition"
                 >
                     {isLoading ? 'Loading...' : 'Load Personalized Recommendations'}
                 </button>
-            </div>
+            </div> */}
 
             {recommendations && (
                 <div className="bg-white rounded-xl shadow p-6">

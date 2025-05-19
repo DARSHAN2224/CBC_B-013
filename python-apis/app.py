@@ -69,48 +69,34 @@ def generate_suggestions():
         print("Error occurred:", e)
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
     
+def load_videos_from_txt(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        videos = file.readlines()
+    return [video.strip() for video in videos if video.strip()]
+
+# Build the prompt for Gemini
+def build_prompt(user_data, video_list):
+    interests = user_data.get("interests", [])
+    watch_history = user_data.get("watch_history", [])
+    prompt = f"""
+    The user has the following interests: {interests}
+    and has previously watched: {watch_history}.
+    From the list of available videos below, suggest the 5 most relevant:
+
+    {video_list}
+    """
+    return prompt
+
 @app.route('/recommend_personal_habits', methods=['POST'])
-def recommend_from_file():
+def recommend_videos():
     try:
-        input_data = request.get_json()
-        if not input_data:
-            return jsonify({"error": "No input data provided"}), 400
-
-        file_path = os.path.join(os.path.dirname(__file__), 'user_habits.txt')
-        print(f"File path: {file_path}")
-
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"{file_path} does not exist")
-
-        try:
-            with open(file_path, 'r') as f:
-                user_data = json.load(f)
-        except json.JSONDecodeError:
-            return jsonify({"error": "Invalid JSON format in user_habits.txt"}), 400
-
-        print(f"Loaded user data: {user_data}")
-
-        prompt = (
-            f"User Data: {json.dumps(input_data, indent=2)}\n\n"
-            "Recommend:\n"
-            "- 5 Uplifting Music\n"
-            "- 5 Comedy Videos\n"
-            "- 5 Travel Destinations\n"
-            "- 5 Yoga/Meditation Routines"
-        )
-
-        result = generate_gemini_response(prompt)
-
-        if isinstance(result, str):
-            result = json.loads(result)
-
-        return jsonify(result)
-
-    except FileNotFoundError as e:
-        return jsonify({"error": str(e)}), 404
+        user_data = request.json  # Expecting JSON from Node.js backend
+        video_list = load_videos_from_txt("user_habits.txt")
+        prompt = build_prompt(user_data, video_list)
+        recommendations = generate_gemini_response(prompt)
+        return jsonify({"recommendations": recommendations})
     except Exception as e:
-        print(f"Error: {str(e)}")  # Log the detailed error to the console
-        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
 
 

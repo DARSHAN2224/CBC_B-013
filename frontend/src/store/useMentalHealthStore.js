@@ -62,9 +62,13 @@ export const useMentalStore = create((set, get) => ({
   },
 
   storeAnswers: async (user_id, answers) => {
+        console.log(user_id,answers);
+
     set({ isLoading: true, error: null });
     try {
-      await axios.post(`${API_URL}/store_answers`, { user_id, answers });
+    const res=  await axios.post(`${API_URL}/store-answers`, { user_id, answers });
+    console.log(res);
+    
       set({ isLoading: false });
     } catch (error) {
       const msg = extractError(error);
@@ -75,7 +79,7 @@ export const useMentalStore = create((set, get) => ({
   generateSuggestions: async (user_id) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await axios.post(`${API_URL}/generate_suggestions`, { user_id });
+      const res = await axios.post(`${API_URL}/generate-suggestions`, { user_id });
       set({ suggestions: res.data.data.suggestions, isLoading: false });
     } catch (error) {
       const msg = extractError(error);
@@ -86,7 +90,7 @@ export const useMentalStore = create((set, get) => ({
   fetchRecommendations: async (user_id) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await axios.post(`${API_URL}/recommend_personal_habits`, { user_id });
+      const res = await axios.post(`${API_URL}/recommend-personal-habits`, { user_id });
       set({ recommendations: res.data.data.suggestion, isLoading: false });
     } catch (error) {
       const msg = extractError(error);

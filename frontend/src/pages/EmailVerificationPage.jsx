@@ -7,12 +7,14 @@ const EmailVerificationPage = () => {
     const [code, setCode] = useState(["", "", "", "", "", ""]);
     const inputRefs = useRef([]);
     const navigate = useNavigate();
+
     const { error, isLoading, verifyEmail } = useAuthStore();
 
+    // Handle digit input or paste
     const handleChange = (index, value) => {
         const newCode = [...code];
 
-        // Handle pasted content
+        // If user pastes the entire code
         if (value.length > 1) {
             const pastedCode = value.slice(0, 6).split("");
             for (let i = 0; i < 6; i++) {
@@ -22,37 +24,40 @@ const EmailVerificationPage = () => {
 
             const lastFilledIndex = newCode.findLastIndex((digit) => digit !== "");
             const focusIndex = lastFilledIndex < 5 ? lastFilledIndex + 1 : 5;
-            inputRefs.current[focusIndex].focus();
+            inputRefs.current[focusIndex]?.focus();
         } else {
             newCode[index] = value;
             setCode(newCode);
 
-            // Move focus to the next input field if value is entered
+            // Move to next input
             if (value && index < 5) {
-                inputRefs.current[index + 1].focus();
+                inputRefs.current[index + 1]?.focus();
             }
         }
     };
 
+    // Backspace to previous field if empty
     const handleKeyDown = (index, e) => {
         if (e.key === "Backspace" && !code[index] && index > 0) {
-            inputRefs.current[index - 1].focus();
+            inputRefs.current[index - 1]?.focus();
         }
     };
 
+    // Submit form with 6-digit code
     const handleSubmit = async (e) => {
         e.preventDefault();
         const verificationCode = code.join("");
+
         try {
             const response = await verifyEmail(verificationCode);
-            navigate('/login');
             toast.success(response.message);
+            navigate('/login');
         } catch (err) {
             console.error(err);
         }
     };
 
-    // Auto-submit when all fields are filled
+    // Auto-submit when all 6 digits are filled
     useEffect(() => {
         if (code.every((digit) => digit !== "")) {
             handleSubmit(new Event("submit"));
@@ -61,11 +66,15 @@ const EmailVerificationPage = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-900">
-            <div className="bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl p-8 w-full max-w-md">
+            <div className="bg-gray-800 bg-opacity-50 backdrop-blur-xl rounded-2xl shadow-xl p-8 w-full max-w-md">
                 <h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-green-400 to-emerald-500 text-transparent bg-clip-text">
                     Verify Your Email
                 </h2>
-                <p className="text-center text-gray-300 mb-6">Enter the 6-digit code sent to your email address.</p>
+
+                <p className="text-center text-gray-300 mb-6">
+                    Enter the 6-digit code sent to your email address.
+                </p>
+
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="flex justify-between">
                         {code.map((digit, index) => (
@@ -81,7 +90,11 @@ const EmailVerificationPage = () => {
                             />
                         ))}
                     </div>
-                    {error && <p className="text-red-500 font-semibold mt-2">{error}</p>}
+
+                    {error && (
+                        <p className="text-red-500 font-semibold mt-2 text-center">{error}</p>
+                    )}
+
                     <button
                         type="submit"
                         disabled={isLoading || code.some((digit) => !digit)}
